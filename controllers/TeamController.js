@@ -2,20 +2,26 @@ const Team = require('../models/Team');
 
 const TeamUpdate = async (req, res) => {
   try {
-    const { projectName, teamMemberName, updateText, dueDate } = req.body;
+    const { projectName, teamMemberName, updateText } = req.body;
+
+    if (!projectName || !teamMemberName || !updateText) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
     const teamUpdate = new Team({
       projectName,
       teamMemberName,
       updateText,
-      dueDate,
     });
+
     await teamUpdate.save();
     return res.status(201).json({ message: "Updated" });
   } catch (error) {
-    console.error('Error Saving Team Update:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("Error Saving Team Update:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 const getAllTeamUpdates = async (req, res) => {
   try {
@@ -29,6 +35,9 @@ const getAllTeamUpdates = async (req, res) => {
 
 const deleteTeamUpdate = async (req, res) => {
   const updateId = req.params.updateId;
+  if (!mongoose.Types.ObjectId.isValid(updateId)) {
+    return res.status(400).json({ message: "Invalid updateId" });
+  }
 
   try {
     const deletedUpdate = await Team.findByIdAndDelete(updateId);
